@@ -1,0 +1,611 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Consent Yönetimi</title>
+
+    <style>
+        :root {
+            --bg: #f3f4f6;
+            --surface: #ffffff;
+            --border: #e5e7eb;
+            --text: #111827;
+            --muted: #6b7280;
+            --primary: #1e3a5f;
+            --primary-hover: #16304f;
+            --danger: #b42318;
+            --warning: #b45309;
+            --time-bg: #f1f5f9;
+            --radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+            font-size: 14px;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        .topbar {
+            background: var(--primary);
+            color: #fff;
+            padding: 16px 32px;
+        }
+
+            .topbar h1 {
+                margin: 0;
+                font-size: 18px;
+                font-weight: 600;
+                letter-spacing: 0.3px;
+            }
+
+        .page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px 32px 40px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        }
+
+        /* ---------- Form ---------- */
+        .form-container {
+            padding: 20px 24px;
+            margin-bottom: 16px;
+        }
+
+            .form-container h3 {
+                margin: 0 0 16px;
+                font-size: 15px;
+                font-weight: 600;
+            }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+        }
+
+        .field label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .field input {
+            width: 100%;
+            padding: 9px 11px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--text);
+            background: #fff;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+            .field input:focus {
+                outline: none;
+                border-color: var(--primary);
+                box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.15);
+            }
+
+        .form-actions {
+            margin-top: 18px;
+            display: flex;
+            gap: 8px;
+        }
+
+        /* ---------- Butonlar ---------- */
+        button {
+            padding: 8px 16px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s, border-color 0.15s;
+        }
+
+            button:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+        .save-button {
+            background: var(--primary);
+            color: #fff;
+        }
+
+            .save-button:hover:not(:disabled) {
+                background: var(--primary-hover);
+            }
+
+        .cancel-button {
+            background: #fff;
+            color: var(--text);
+            border-color: #d1d5db;
+        }
+
+            .cancel-button:hover:not(:disabled) {
+                background: #f9fafb;
+            }
+
+        .edit-button, .delete-button {
+            padding: 5px 12px;
+            background: #fff;
+            font-size: 12px;
+            margin-right: 4px;
+        }
+
+        .edit-button {
+            color: var(--primary);
+            border-color: #c5d0de;
+        }
+
+            .edit-button:hover:not(:disabled) {
+                background: var(--primary);
+                color: #fff;
+            }
+
+        .delete-button {
+            color: var(--danger);
+            border-color: #f0c8c4;
+        }
+
+            .delete-button:hover:not(:disabled) {
+                background: var(--danger);
+                color: #fff;
+            }
+
+        /* ---------- Durum ---------- */
+        #status {
+            margin: 0 0 12px;
+            padding: 0 2px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--muted);
+        }
+
+        /* ---------- Tablo ---------- */
+        .table-container {
+            max-height: 62vh;
+            overflow: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        th, td {
+            padding: 10px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background: #f9fafb;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            border-bottom: 1px solid #d1d5db;
+        }
+
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        td:first-child {
+            font-variant-numeric: tabular-nums;
+            color: var(--muted);
+        }
+
+        .time-row, .time-row:hover {
+            background: #dbe7f5;
+        }
+
+            .time-row td {
+                padding: 8px 14px;
+                font-size: 13px;
+                font-weight: 700;
+                color: var(--primary);
+                border-top: 1px solid #9db4d0;
+                border-bottom: 1px solid #9db4d0;
+            }
+
+                .time-row td:first-child {
+                    border-left: 4px solid var(--primary);
+                }
+
+                .time-row td:nth-child(3) {
+                    font-size: 14px;
+                    letter-spacing: 0.5px;
+                    font-variant-numeric: tabular-nums;
+                }
+
+        @media (max-width: 640px) {
+            .topbar {
+                padding: 14px 16px;
+            }
+
+            .page {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="topbar">
+        <h1>Consent Kayıt Yönetimi</h1>
+    </header>
+
+    <main class="page">
+        <section class="card form-container">
+            <h3 id="formTitle">Yeni Kayıt Ekle</h3>
+
+            <div class="form-grid">
+                <div class="field">
+                    <label for="type">Type</label>
+                    <input type="text" id="type" placeholder="Type" />
+                </div>
+                <div class="field">
+                    <label for="recipient">Recipient</label>
+                    <input type="text" id="recipient" placeholder="Recipient" />
+                </div>
+                <div class="field">
+                    <label for="statusInput">Status</label>
+                    <input type="text" id="statusInput" placeholder="Status" />
+                </div>
+                <div class="field">
+                    <label for="recipientType">Recipient Type</label>
+                    <input type="text" id="recipientType" placeholder="RecipientType" />
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button class="save-button" id="saveButton" onclick="saveConsent()">Kayıt Ekle</button>
+                <button class="cancel-button" id="cancelButton" onclick="cancelEdit()" style="display:none">Vazgeç</button>
+            </div>
+        </section>
+
+        <p id="status">Kayıtlar yükleniyor...</p>
+
+        <section class="card table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Type</th>
+                        <th>Recipient</th>
+                        <th>Status</th>
+                        <th>RecipientType</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody id="consentTableBody"></tbody>
+            </table>
+        </section>
+    </main>
+
+    <script>
+        const API_BASE_URL = "/api";
+        const BATCH_SIZE = 10;
+
+        const tableBody = document.getElementById("consentTableBody");
+        const statusElement = document.getElementById("status");
+        const saveButton = document.getElementById("saveButton");
+
+        let token = null;
+        let editingId = null;
+        let busy = false;
+        let newCount = 0; // ilk yüklemeden sonra eklenen kayıt sayısı
+
+        // ---------- Kimlik doğrulama ----------
+        async function authenticate() {
+            const response = await fetch(`${API_BASE_URL}/user/authenticate`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    username: "User-5E638711-2D64-47B0-A8F5-1C5A9EADA966",
+                    password: "Pass-E4A679C7-2F4B-40AE-9DC8-C967EF7215AE"
+                })
+            });
+
+            if (!response.ok) throw new Error("Kimlik doğrulama başarısız.");
+
+            const data = await response.json();
+            return data.jwtToken;
+        }
+
+        function getHeaders() {
+            return {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            };
+        }
+
+        // 401 alınırsa token yenileyip isteği bir kez daha dener
+        async function authorizedFetch(url, options = {}) {
+            let response = await fetch(url, { ...options, headers: getHeaders() });
+
+            if (response.status === 401) {
+                token = await authenticate();
+                if (!token) throw new Error("Kimlik doğrulama yenilenemedi.");
+                response = await fetch(url, { ...options, headers: getHeaders() });
+            }
+
+            return response;
+        }
+
+        // ---------- Yardımcılar ----------
+        // İşlem sürerken butonları kilitler (çift tıklamayı engeller)
+        function setBusy(value) {
+            busy = value;
+            saveButton.disabled = value;
+            document.querySelectorAll(".edit-button, .delete-button")
+                .forEach(b => b.disabled = value);
+        }
+
+        async function readError(response, fallback) {
+            const text = await response.text();
+            return `${fallback} HTTP: ${response.status}${text ? " - " + text : ""}`;
+        }
+
+        // ---------- Okuma ----------
+        async function getConsents(startId, count) {
+            const response = await authorizedFetch(`${API_BASE_URL}/consents`, {
+                method: "POST",
+                body: JSON.stringify({ startId, count })
+            });
+
+            if (!response.ok) throw new Error(await readError(response, "Kayıtlar alınamadı."));
+
+            return await response.json();
+        }
+
+        // ---------- Satır oluşturma ----------
+        function createConsentRow(consent) {
+            const row = document.createElement("tr");
+            row.dataset.id = consent.id;
+
+            [consent.id, consent.type, consent.recipient, consent.status, consent.recipientType]
+                .forEach(value => {
+                    const cell = document.createElement("td");
+                    cell.textContent = value ?? "";
+                    row.appendChild(cell);
+                });
+
+            const actionCell = document.createElement("td");
+
+            const editButton = document.createElement("button");
+            editButton.textContent = "Güncelle";
+            editButton.className = "edit-button";
+            editButton.onclick = () => editConsent(consent);
+
+            const deleteButton = document.createElement("button");
+            deleteButton.textContent = "Sil";
+            deleteButton.className = "delete-button";
+            deleteButton.onclick = () => deleteConsent(consent.id);
+
+            actionCell.appendChild(editButton);
+            actionCell.appendChild(deleteButton);
+            row.appendChild(actionCell);
+
+            return row;
+        }
+
+        // Paket sonrası eklenen satır: Recipient alanına saat yazılır
+        function createTimeRow() {
+            const row = document.createElement("tr");
+            row.className = "time-row";
+
+            for (let i = 0; i < 6; i++) {
+                const cell = document.createElement("td");
+                if (i === 2) cell.textContent = new Date().toLocaleTimeString("tr-TR");
+                row.appendChild(cell);
+            }
+
+            return row;
+        }
+
+        function addConsentRow(consent) {
+            tableBody.prepend(createConsentRow(consent));
+        }
+
+        // ---------- Form ----------
+        function getFormData() {
+            return {
+                type: document.getElementById("type").value.trim(),
+                recipient: document.getElementById("recipient").value.trim(),
+                status: document.getElementById("statusInput").value.trim(),
+                recipientType: document.getElementById("recipientType").value.trim()
+            };
+        }
+
+        function clearForm() {
+            ["type", "recipient", "statusInput", "recipientType"]
+                .forEach(id => document.getElementById(id).value = "");
+        }
+
+        // ---------- Ekle / Güncelle ----------
+        async function saveConsent() {
+            if (busy) return;
+
+            const consent = getFormData();
+
+            if (!consent.type || !consent.recipient || !consent.status || !consent.recipientType) {
+                alert("Lütfen bütün alanları doldurun.");
+                return;
+            }
+
+            setBusy(true);
+
+            try {
+                if (editingId === null) {
+                    // CREATE
+                    const response = await authorizedFetch(`${API_BASE_URL}/consents/create`, {
+                        method: "POST",
+                        body: JSON.stringify(consent)
+                    });
+
+                    if (!response.ok) throw new Error(await readError(response, "Kayıt eklenemedi."));
+
+                    const created = await response.json();
+                    addConsentRow(created);
+
+                    // Her 10 yeni kayıttan sonra saat satırı ekle
+                    newCount++;
+                    if (newCount % BATCH_SIZE === 0) {
+                        tableBody.prepend(createTimeRow());
+                    }
+
+                    statusElement.textContent = `${created.id} Id'li kayıt eklendi.`;
+                } else {
+                    // UPDATE
+                    const response = await authorizedFetch(`${API_BASE_URL}/consents/${editingId}`, {
+                        method: "PUT",
+                        body: JSON.stringify(consent)
+                    });
+
+                    if (!response.ok) throw new Error(await readError(response, "Kayıt güncellenemedi."));
+
+                    const updated = await response.json();
+                    const oldRow = tableBody.querySelector(`tr[data-id="${editingId}"]`);
+                    if (oldRow) oldRow.replaceWith(createConsentRow(updated));
+
+                    statusElement.textContent = `${editingId} Id'li kayıt güncellendi.`;
+                }
+
+                cancelEdit();
+            } catch (error) {
+                alert(error.message);
+                console.error(error);
+            } finally {
+                setBusy(false);
+            }
+        }
+
+        function editConsent(consent) {
+            if (busy) return;
+
+            editingId = consent.id;
+
+            document.getElementById("type").value = consent.type ?? "";
+            document.getElementById("recipient").value = consent.recipient ?? "";
+            document.getElementById("statusInput").value = consent.status ?? "";
+            document.getElementById("recipientType").value = consent.recipientType ?? "";
+
+            document.getElementById("formTitle").textContent = `${consent.id} Id'li Kaydı Güncelle`;
+            saveButton.textContent = "Değişiklikleri Kaydet";
+            document.getElementById("cancelButton").style.display = "inline-block";
+
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        function cancelEdit() {
+            editingId = null;
+            clearForm();
+
+            document.getElementById("formTitle").textContent = "Yeni Kayıt Ekle";
+            saveButton.textContent = "Kayıt Ekle";
+            document.getElementById("cancelButton").style.display = "none";
+        }
+
+        // ---------- Silme ----------
+        async function deleteConsent(id) {
+            if (busy) return;
+            if (!confirm(`${id} Id'li kaydı silmek istediğinize emin misiniz?`)) return;
+
+            setBusy(true);
+
+            try {
+                const response = await authorizedFetch(`${API_BASE_URL}/consents/${id}`, {
+                    method: "DELETE"
+                });
+
+                if (!response.ok) throw new Error(await readError(response, "Kayıt silinemedi."));
+
+                const row = tableBody.querySelector(`tr[data-id="${id}"]`);
+                if (row) row.remove();
+
+                if (editingId === id) cancelEdit();
+
+                statusElement.textContent = `${id} Id'li kayıt silindi.`;
+            } catch (error) {
+                alert(error.message);
+                console.error(error);
+            } finally {
+                setBusy(false);
+            }
+        }
+
+        // ---------- İlk yükleme: 10'ar 10'ar ----------
+        async function loadConsents() {
+            setBusy(true);
+
+            try {
+                statusElement.textContent = "Kimlik doğrulanıyor...";
+                token = await authenticate();
+
+                if (!token) throw new Error("JWT token alınamadı.");
+
+                let startId = 1;
+                let totalLoaded = 0;
+
+                while (true) {
+                    statusElement.textContent = `${totalLoaded} kayıt yüklendi...`;
+
+                    const consents = await getConsents(startId, BATCH_SIZE);
+                    if (consents.length === 0) break;
+
+                    // Paket: büyük Id üstte, küçük Id altta
+                    const fragment = document.createDocumentFragment();
+                    consents.slice().reverse().forEach(c => fragment.appendChild(createConsentRow(c)));
+
+                    // Önce paket, sonra onun üstüne saat satırı
+                    tableBody.prepend(fragment);
+                    tableBody.prepend(createTimeRow());
+
+                    totalLoaded += consents.length;
+                    startId = consents[consents.length - 1].id + 1;
+
+                    if (consents.length < BATCH_SIZE) break;
+                }
+
+                statusElement.textContent = `Yükleme tamamlandı. Toplam ${totalLoaded} kayıt gösteriliyor.`;
+            } catch (error) {
+                console.error(error);
+                statusElement.textContent = `Hata: ${error.message}`;
+            } finally {
+                setBusy(false);
+            }
+        }
+
+        loadConsents();
+    </script>
+</body>
+</html>
